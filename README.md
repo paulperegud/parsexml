@@ -1,3 +1,11 @@
+Note! Incompatible fork!
+========================
+
+This is a fork of Max Lapshin's parsexml which produces xmerl-compatible output.
+
+Additional change: xparsexml.erl module contains parser capable of working
+with XML with $< and $> escaped as &lt; and $gt;
+
 ParseXML
 ========
 
@@ -13,7 +21,7 @@ Usage:
 
 
 ```
-{Tag, Attrs, Content} = parsexml:parse(Bin). 
+{Tag, Attrs, Content} = parsexml:parse(Bin).
 ```
 
 Where Tag is binary name of root tag, Attrs is a {Key,Value} list of attrs and Content is
@@ -31,9 +39,9 @@ $ ./bench.erl m.xml 500
    xmerl:     8511ms     2845KB 1MB/s
 parsexml:     1047ms       86KB 14MB/s
   erlsom:     3428ms     1759KB 4MB/s
-$ wc -l m.xml 
+$ wc -l m.xml
       82 m.xml
-$ du -hs m.xml 
+$ du -hs m.xml
  32K  m.xml
 ```
 
@@ -80,4 +88,3 @@ parsexml:    19656ms     7449KB 2MB/s
 ```
 
 Time is lowered to to frequent garbage collection, but memory footprint is again better for parsexml
-
