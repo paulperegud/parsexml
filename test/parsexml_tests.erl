@@ -1,37 +1,41 @@
 -module(parsexml_tests).
+-include_lib("xmerl/include/xmerl.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -compile(export_all).
 
 
 parse_test_() -> 
+    A = #xmlElement{name = html, expanded_name = html},
+    B = A#xmlElement{attributes=[#xmlAttribute{name = xmlns, value = <<"w3c">>}]},
+    C = A#xmlElement{attributes=[#xmlAttribute{name = k, value = <<"v">>}]},
   [
-  ?_assertEqual({<<"html">>, [], []},
+  ?_assertEqual(A,
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html></html>\n">>))
-  ,?_assertEqual({<<"html">>, [], []},
+  ,?_assertEqual(A,
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n <html></html>\n">>))
-  ,?_assertEqual({<<"html">>, [], []},
+  ,?_assertEqual(A,
     parsexml:parse(<<"\n\n\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html></html>\n">>))
-  ,?_assertEqual({<<"html">>, [], []},
+  ,?_assertEqual(A,
     parsexml:parse(<<"\n<html></html>\n">>))
-  ,?_assertEqual({<<"html">>, [], []},
+  ,?_assertEqual(A,
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html ></html>\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"xmlns">>,<<"w3c">>}], []}, 
+  ,?_assertEqual(B, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html xmlns=\"w3c\"></html>\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"xmlns">>,<<"w3c">>}], []}, 
+  ,?_assertEqual(B, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html xmlns=\"w3c\" ></html>\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"xmlns">>,<<"w3c">>}], []}, 
+  ,?_assertEqual(B, 
     parsexml:parse(<<"<html xmlns='w3c' />\n">>))
-  ,?_assertEqual({<<"html">>, [], []}, 
+  ,?_assertEqual(A, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html/>\n">>))
-  ,?_assertEqual({<<"html">>, [], []}, 
+  ,?_assertEqual(A, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html />\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"k">>,<<"v">>}], []}, 
+  ,?_assertEqual(C, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html k=\"v\"/>\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"k">>,<<"v">>}], []}, 
+  ,?_assertEqual(C, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html k=\"v\" />\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"k">>,<<"v">>}], []}, 
+  ,?_assertEqual(C, 
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<html k=\"v\" />\r\n">>))
-  ,?_assertEqual({<<"html">>, [{<<"k">>,<<"v">>}], []},
+  ,?_assertEqual(C,
     parsexml:parse(<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE some_dtd SYSTEM \"example.dtd\">\n<html k=\"v\" />\n">>))
   ].
 

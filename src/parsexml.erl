@@ -1,7 +1,8 @@
 -module(parsexml).
 -export([parse/1]).
--include_lib("eunit/include/eunit.hrl").
 
+-include_lib("xmerl/include/xmerl.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 parse(Bin) when is_binary(Bin) ->
   Bin1 = skip_declaration(Bin),
@@ -28,8 +29,21 @@ trim(<<"\t",Bin/binary>>) -> trim(Bin);
 trim(<<"\r",Bin/binary>>) -> trim(Bin);
 trim(Bin) -> Bin.
 
+b2a(Binary) ->
+    list_to_atom(binary_to_list(Binary)).
 
+rtag(Name, Attrs, Content) ->
+    AName = b2a(Name),
+    #xmlElement{name = AName, 
+		expanded_name = AName, 
+		attributes = Attrs, 
+		content = Content}.
 
+rattr(Key, Value) ->
+    #xmlAttribute{name = b2a(Key), value = Value}.
+
+rtext(Bin) ->
+    #xmlText{value = Bin}.
 
 tag(<<"<", Bin/binary>>) ->
   [TagHeader1,Rest1] = binary:split(Bin, <<">">>),
@@ -38,11 +52,11 @@ tag(<<"<", Bin/binary>>) ->
   case TagHeader1 of
     <<TagHeader:Len/binary, "/">> ->
       {Tag, Attrs} = tag_header(TagHeader),
-      {{Tag,Attrs,[]}, Rest1};
+      {rtag(Tag, Attrs, []), Rest1};
     TagHeader ->
       {Tag, Attrs} = tag_header(TagHeader),
       {Content, Rest2} = tag_content(Rest1, Tag),
-      {{Tag,Attrs,Content}, Rest2}
+      {rtag(Tag, Attrs, Content), Rest2}
   end.
 
 tag_header(TagHeader) ->
@@ -58,7 +72,7 @@ tag_attrs(Attrs) ->
   case binary:split(Attrs,<<"=">>) of
     [Key,<<Quote:1/binary,Value1/binary>>] when Quote == <<"\"">> orelse Quote == <<"'">> ->
       [Value,Rest] = binary:split(Value1,Quote),
-      [{Key,Value}|tag_attrs(Rest)]
+      [rattr(Key, Value) | tag_attrs(Rest)]
   end.
 
 
@@ -77,7 +91,7 @@ tag_content(<<"<",_/binary>> = Bin, Parent) ->
 
 tag_content(Bin, Parent) ->
   [Text, Rest] = binary:split(Bin, <<"</",Parent/binary,">">>),
-  {[Text],Rest}.
+  {[rtext(Text)],Rest}.
 
 
 
